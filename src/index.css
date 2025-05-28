@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -96,6 +97,38 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-portfolio-dark text-gray-100 font-sans;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8 xl:px-12;
+  }
+  
+  .container-width {
+    @apply max-w-7xl mx-auto;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-portfolio-blue to-portfolio-lightBlue bg-clip-text text-transparent;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-portfolio-blue/20;
+  }
+  
+  .nav-link {
+    @apply relative text-gray-300 hover:text-white transition-colors duration-300;
+  }
+  
+  .nav-link::after {
+    @apply content-[''] absolute bottom-0 left-0 w-0 h-0.5 bg-portfolio-blue transition-all duration-300;
+  }
+  
+  .nav-link:hover::after {
+    @apply w-full;
   }
 }
