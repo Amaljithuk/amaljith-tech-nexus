@@ -1,7 +1,6 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Code, User } from 'lucide-react';
+import { ArrowRight, Code } from 'lucide-react';
 
 const Index = () => {
   const skills = [
@@ -44,8 +43,12 @@ const Index = () => {
           <div className="animate-slide-in-right">
             <div className="relative">
               <div className="w-80 h-80 mx-auto rounded-full bg-gradient-to-br from-portfolio-blue to-portfolio-lightBlue p-1">
-                <div className="w-full h-full rounded-full bg-portfolio-navy flex items-center justify-center">
-                  <User size={120} className="text-portfolio-blue" />
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/5af4c3dd-a460-4f4f-b74f-710635c36751.png" 
+                    alt="Amaljith U K - Profile Picture"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-portfolio-blue/20 rounded-full animate-float"></div>
