@@ -8,7 +8,7 @@ Tailwind, and drawn to match the résumé.
 
 | Route | Chapter | What it is |
 | --- | --- | --- |
-| `/` | Cover | Hero panel, stat stickers, skill power-bars, this month's issues |
+| `/` | Cover | Opening panel, stat stickers, skill power-bars, this month's issues |
 | `/about` | 01 · Origin | Comic strip, education, the three internships, gadget belt, side quests |
 | `/projects` | 02 · Issues | Four project "issues" with a category filter |
 | `/achievements` | 03 · Trophy room | UGC NET, ModelQuest, certificates, sports panel |
@@ -27,8 +27,14 @@ the photo).
 
 ## Playful bits (on purpose)
 
-- Sound-effect words pop wherever you click; a **SFX** toggle in the navbar adds tiny
-  8-bit blips (WebAudio, no audio files, off by default).
+- **Comic cursor:** an inked arrow that leans into its own movement, a lagging dashed
+  reticle that locks on to anything clickable, and a little trail of stars. Only on
+  precise pointers; touch devices and reduced-motion visitors keep the normal cursor.
+- **Sound kit:** a `SFX` toggle (on by default, remembered per browser) adds hover ticks,
+  click pops, a page-change whoosh and a three-note chime when the contact mail opens.
+  Everything is synthesised with WebAudio — no audio files, and it waits for a real
+  gesture before making a peep.
+- Sound-effect words pop wherever you click, on top of the sound kit.
 - Comic panels reveal with a springy page-turn as you scroll (disabled automatically for
   `prefers-reduced-motion`).
 - Two infinite ticker strips, a reading-progress rail, sticker navigation, halftone
@@ -49,7 +55,7 @@ npm run preview
 - Vite 5 · React 18 · TypeScript
 - Tailwind CSS 3 (custom comic design tokens in `src/index.css`)
 - React Router 6
-- Hand-rolled design system in `src/components/comic/` (`ComicKit`, `Effects`)
+- Hand-rolled design system in `src/components/comic/` (`ComicKit`, `Effects`, `CursorFX`)
 - Fonts: Bangers + Comic Neue + Special Elite (Google Fonts), with system comic fallbacks
 
 ## Contact

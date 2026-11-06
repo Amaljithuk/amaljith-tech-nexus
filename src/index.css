@@ -137,6 +137,15 @@
 @keyframes bar-fill {
   from { width: 0; }
 }
+@keyframes spark-out {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
+  25% { opacity: 0.95; transform: translate(-50%, -50%) scale(1) rotate(30deg); }
+  100% { opacity: 0; transform: translate(-50%, -65%) scale(0.7) rotate(140deg); }
+}
+@keyframes ring-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
 
 @layer components {
   /* ---------- layout helpers ---------- */
@@ -446,6 +455,82 @@
     border-bottom: 4px solid var(--ink);
     box-shadow: 0 5px 0 rgba(19, 18, 23, 0.08);
   }
+
+  /* ---------- comic cursor ---------- */
+  .comic-cursor {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .cursor-arrow,
+  .cursor-ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    will-change: transform;
+    transition: opacity 0.22s ease;
+  }
+  .cursor-arrow {
+    margin: -2px 0 0 -2px;
+    filter: drop-shadow(0 0 1.5px rgba(255, 253, 246, 0.9))
+      drop-shadow(3px 4px 0 rgba(19, 18, 23, 0.35));
+    transition: opacity 0.22s ease, scale 0.14s cubic-bezier(0.34, 1.6, 0.4, 1);
+  }
+  .cursor-arrow svg { display: block; }
+  .cursor-arrow { transform-origin: 5px 5px; }
+  .cursor-arrow.is-hot { scale: 1.12; }
+  .cursor-arrow.is-hot path:first-child { fill: var(--yellow); }
+  .cursor-arrow.is-down { scale: 0.82; }
+  .cursor-ring {
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 2.5px dashed rgba(19, 18, 23, 0.62);
+    border-radius: 999px;
+    background: rgba(255, 253, 246, 0.14);
+    box-shadow: 0 0 0 2px rgba(255, 253, 246, 0.5), 0 0 12px rgba(19, 18, 23, 0.12);
+    transition: opacity 0.22s ease, scale 0.18s cubic-bezier(0.34, 1.6, 0.4, 1),
+      border-color 0.18s ease, background 0.18s ease;
+  }
+  .cursor-ring.is-hot {
+    scale: 1.55;
+    border-style: solid;
+    border-color: var(--red);
+    background: rgba(255, 217, 61, 0.16);
+  }
+  .cursor-ring.is-down { scale: 0.9; }
+  .cursor-ring-dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    margin: -2px 0 0 -2px;
+    border-radius: 999px;
+    background: var(--ink);
+    opacity: 0.55;
+  }
+  .cursor-spark {
+    position: fixed;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    pointer-events: none;
+    line-height: 1;
+    text-shadow: 1px 1px 0 var(--ink);
+    will-change: transform, opacity;
+  }
+  .cursor-spark.go { animation: spark-out 0.65s ease-out forwards; }
+}
+
+/* hide the native pointer only where the comic one is mounted */
+@media (hover: hover) and (pointer: fine) {
+  .has-comic-cursor,
+  .has-comic-cursor * { cursor: none; }
+  .has-comic-cursor input,
+  .has-comic-cursor textarea { cursor: text; }
 }
 
 @layer utilities {

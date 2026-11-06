@@ -53,7 +53,7 @@ const About = () => {
           <span className="sticker sticker-blue">Origin story</span>
         </div>
         <h1 className="display mt-4 text-[clamp(2.8rem,8vw,5rem)] leading-[0.85] title-ink">
-          How this hero
+          How this dev
           <br /> got compiled
         </h1>
         <p className="mt-5 max-w-2xl text-lg text-comic-ink/80">

@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ChapterTitle, Reveal, SpeechBubble, Starburst } from "@/components/comic/ComicKit";
+import { useSfx } from "@/components/comic/Effects";
 import { languages, profile } from "@/data/resume";
 
 const channels = [
@@ -56,6 +57,7 @@ const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [copied, setCopied] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const { play } = useSfx();
 
   const update = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
@@ -70,6 +72,7 @@ const Contact = () => {
     );
     window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`;
     setSent(true);
+    play("success");
   };
 
   const copy = async (text: string) => {
@@ -169,7 +172,7 @@ const Contact = () => {
             </label>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button type="submit" className="btn-comic btn-red">
+              <button type="submit" className="btn-comic btn-red" data-sfx-quiet>
                 <Send size={17} /> Send it
               </button>
               <button

@@ -48,7 +48,7 @@ export const profile = {
   name: "Amaljith U K",
   first: "Amaljith",
   last: "U K",
-  alias: "The Full-Stack Crusader",
+  alias: "The Full-Stack Workhorse",
   issue: "Issue #01",
   edition: "Newsprint Edition · Kochi, Kerala",
   headline: "MCA grad who ships full-stack products and teaches AI agents to attack themselves.",

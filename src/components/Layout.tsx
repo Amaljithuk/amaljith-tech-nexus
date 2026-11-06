@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Github, Linkedin, Mail, Menu, X, Volume2, VolumeX, Phone } from "lucide-react";
 import { profile } from "@/data/resume";
 import { Marquee } from "@/components/comic/ComicKit";
 import { SfxProvider, ScrollProgress, SoundWords, useSfx } from "@/components/comic/Effects";
+import { CursorFX } from "@/components/comic/CursorFX";
 
 const navigation = [
   { name: "Home", label: "Home", href: "/" },
@@ -28,11 +29,17 @@ const LayoutInner = ({ children }: { children: React.ReactNode }) => {
   const [scrolled, setScrolled] = useState(false);
   const { enabled, toggle, play } = useSfx();
   const location = useLocation();
+  const firstRender = useRef(true);
 
   useEffect(() => {
     setMenuOpen(false);
     window.scrollTo({ top: 0, behavior: "auto" });
-  }, [location.pathname]);
+    if (firstRender.current) {
+      firstRender.current = false;
+    } else {
+      play("whoosh");
+    }
+  }, [location.pathname, play]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -45,6 +52,7 @@ const LayoutInner = ({ children }: { children: React.ReactNode }) => {
     <div className="flex min-h-screen flex-col">
       <ScrollProgress />
       <SoundWords />
+      <CursorFX />
 
       {/* cover banner */}
       <Marquee items={tickerItems} duration={46} className="text-xs sm:text-sm" />
@@ -77,7 +85,6 @@ const LayoutInner = ({ children }: { children: React.ReactNode }) => {
                   key={item.href}
                   to={item.href}
                   className={({ isActive }) => `nav-item ${isActive ? "active" : "text-comic-ink/80"}`}
-                  onClick={() => play("tick")}
                   end={item.href === "/"}
                 >
                   {item.label}
@@ -91,8 +98,9 @@ const LayoutInner = ({ children }: { children: React.ReactNode }) => {
                 onClick={toggle}
                 aria-pressed={enabled}
                 aria-label={enabled ? "Turn sound effects off" : "Turn sound effects on"}
-                title={enabled ? "SFX: ON" : "SFX: OFF"}
+                title={enabled ? "SFX: ON — click to mute" : "SFX: OFF — click for chaos"}
                 className={`btn-comic btn-sm hidden sm:inline-flex ${enabled ? "btn-green" : "btn-paper"}`}
+                data-sfx-quiet
               >
                 {enabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
                 <span className="hidden xl:inline">{enabled ? "Sfx on" : "Sfx off"}</span>
@@ -126,7 +134,7 @@ const LayoutInner = ({ children }: { children: React.ReactNode }) => {
                 className="grid h-10 w-10 place-items-center rounded-lg border-[3px] border-comic-ink bg-comic-yellow shadow-comic-sm lg:hidden"
                 onClick={() => {
                   setMenuOpen((v) => !v);
-                  play("pop");
+                  play("boing");
                 }}
                 aria-expanded={menuOpen}
                 aria-label="Toggle menu"

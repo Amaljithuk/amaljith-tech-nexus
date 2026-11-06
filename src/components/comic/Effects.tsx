@@ -9,9 +9,16 @@ import {
 } from "react";
 
 /* ------------------------------------------------------------------ */
-/*  Tiny 8-bit sound effects (WebAudio, zero assets, off by default)   */
+/*  Tiny 8-bit sound kit (WebAudio, zero assets, on by default)        */
 /* ------------------------------------------------------------------ */
-type SfxKind = "pop" | "boing" | "pow" | "tick";
+export type SfxKind =
+  | "pop"
+  | "tick"
+  | "pow"
+  | "boing"
+  | "whoosh"
+  | "success"
+  | "open";
 
 type SfxValue = {
   enabled: boolean;
@@ -20,88 +27,206 @@ type SfxValue = {
 };
 
 const SfxContext = createContext<SfxValue>({
-  enabled: false,
+  enabled: true,
   toggle: () => {},
   play: () => {},
 });
 
 export const useSfx = () => useContext(SfxContext);
 
-const TONES: Record<SfxKind, { from: number; to: number; type: OscillatorType }> = {
-  pop: { from: 300, to: 720, type: "triangle" },
-  boing: { from: 520, to: 150, type: "sine" },
-  pow: { from: 420, to: 80, type: "square" },
-  tick: { from: 900, to: 900, type: "square" },
+const STORAGE_KEY = "au-sfx";
+
+const TONES: Record<
+  Exclude<SfxKind, "whoosh" | "success">,
+  { from: number; to: number; type: OscillatorType; dur: number; gain: number }
+> = {
+  pop: { from: 300, to: 720, type: "triangle", dur: 0.14, gain: 0.08 },
+  tick: { from: 980, to: 980, type: "square", dur: 0.04, gain: 0.025 },
+  pow: { from: 420, to: 80, type: "square", dur: 0.22, gain: 0.09 },
+  boing: { from: 540, to: 160, type: "sine", dur: 0.26, gain: 0.07 },
+  open: { from: 620, to: 1040, type: "triangle", dur: 0.18, gain: 0.06 },
 };
 
 export const SfxProvider = ({ children }: { children: ReactNode }) => {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(true);
   const ctxRef = useRef<AudioContext | null>(null);
+  const enabledRef = useRef(true);
+  const primedRef = useRef(false);
+
+  // remember the visitor's choice
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored === "off") {
+        setEnabled(false);
+        enabledRef.current = false;
+      }
+    } catch {
+      /* private mode, whatever */
+    }
+  }, []);
+
+  const getCtx = useCallback((): AudioContext | null => {
+    try {
+      const AudioCtor =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtor) return null;
+      if (!ctxRef.current) ctxRef.current = new AudioCtor();
+      if (ctxRef.current.state === "suspended") void ctxRef.current.resume();
+      return ctxRef.current;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const beep = useCallback(
+    (
+      ctx: AudioContext,
+      kind: Exclude<SfxKind, "whoosh" | "success">,
+      at = 0,
+      detune = 0,
+      gainScale = 1
+    ) => {
+      const t = TONES[kind];
+      const start = ctx.currentTime + at;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = t.type;
+      osc.frequency.setValueAtTime(t.from, start);
+      if (t.to !== t.from) {
+        osc.frequency.exponentialRampToValueAtTime(Math.max(40, t.to), start + t.dur);
+      }
+      osc.detune.value = detune;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(t.gain * gainScale, start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + t.dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + t.dur + 0.02);
+    },
+    []
+  );
+
+  const noise = useCallback((ctx: AudioContext, at: number, dur: number, gainValue: number) => {
+    const frames = Math.floor(ctx.sampleRate * dur);
+    const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < frames; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / frames);
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.Q.value = 0.8;
+    const start = ctx.currentTime + at;
+    filter.frequency.setValueAtTime(320, start);
+    filter.frequency.exponentialRampToValueAtTime(2600, start + dur);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(gainValue, start);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    src.start(start);
+    src.stop(start + dur + 0.02);
+  }, []);
 
   const play = useCallback(
     (kind: SfxKind = "pop") => {
-      if (!enabled) return;
+      if (!enabledRef.current || !primedRef.current) return;
+      const ctx = getCtx();
+      if (!ctx) return;
       try {
-        const AudioCtor =
-          window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-        if (!AudioCtor) return;
-        if (!ctxRef.current) ctxRef.current = new AudioCtor();
-        const ctx = ctxRef.current;
-        const tone = TONES[kind];
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = tone.type;
-        osc.frequency.setValueAtTime(tone.from, now);
-        osc.frequency.exponentialRampToValueAtTime(Math.max(40, tone.to), now + 0.13);
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.exponentialRampToValueAtTime(kind === "tick" ? 0.05 : 0.08, now + 0.012);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.18);
+        if (kind === "whoosh") {
+          noise(ctx, 0, 0.32, 0.05);
+          return;
+        }
+        if (kind === "success") {
+          beep(ctx, "open", 0, 0, 0.9);
+          beep(ctx, "open", 0.09, 400, 0.9);
+          beep(ctx, "open", 0.18, 800, 0.9);
+          return;
+        }
+        beep(ctx, kind);
       } catch {
         /* audio is a bonus, never a blocker */
       }
     },
-    [enabled]
+    [beep, getCtx, noise]
   );
 
   const toggle = useCallback(() => {
     setEnabled((prev) => {
       const next = !prev;
+      enabledRef.current = next;
+      try {
+        window.localStorage.setItem(STORAGE_KEY, next ? "on" : "off");
+      } catch {
+        /* ignore */
+      }
       if (next) {
-        // tiny confirmation blip
         window.setTimeout(() => {
-          try {
-            const AudioCtor =
-              window.AudioContext ||
-              (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-            if (!AudioCtor) return;
-            if (!ctxRef.current) ctxRef.current = new AudioCtor();
-            const ctx = ctxRef.current;
-            const t = ctx.currentTime;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = "triangle";
-            osc.frequency.setValueAtTime(440, t);
-            osc.frequency.exponentialRampToValueAtTime(880, t + 0.09);
-            gain.gain.setValueAtTime(0.0001, t);
-            gain.gain.exponentialRampToValueAtTime(0.06, t + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(t);
-            osc.stop(t + 0.15);
-          } catch {
-            /* ignore */
-          }
-        }, 10);
+          const ctx = getCtx();
+          if (!ctx) return;
+          beep(ctx, "open", 0, 0);
+          beep(ctx, "open", 0.1, 400);
+        }, 20);
       }
       return next;
     });
-  }, []);
+  }, [beep, getCtx]);
+
+  /* the browser only lets audio start from a real gesture — wait for one */
+  useEffect(() => {
+    const prime = () => {
+      if (primedRef.current) return;
+      primedRef.current = true;
+      getCtx();
+    };
+    window.addEventListener("pointerdown", prime);
+    window.addEventListener("keydown", prime);
+    return () => {
+      window.removeEventListener("pointerdown", prime);
+      window.removeEventListener("keydown", prime);
+    };
+  }, [getCtx]);
+
+  /* global hover + click sounds, so every button answers back */
+  useEffect(() => {
+    if (!enabled) return;
+
+    let lastHovered: Element | null = null;
+    let lastHoverAt = 0;
+
+    const onOver = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      const hit = target?.closest?.("a, button, summary, [data-sfx-hover]");
+      if (!hit || hit === lastHovered) return;
+      lastHovered = hit;
+      const now = performance.now();
+      if (now - lastHoverAt < 90) return;
+      lastHoverAt = now;
+      play("tick");
+    };
+
+    const onClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const hit = target?.closest?.("a, button, summary, [data-sfx-click]");
+      if (!hit) return;
+      if (hit.hasAttribute("data-sfx-quiet")) return;
+      play(hit.tagName === "A" ? "pow" : "pop");
+    };
+
+    document.addEventListener("pointerover", onOver, { passive: true });
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("pointerover", onOver);
+      document.removeEventListener("click", onClick);
+    };
+  }, [enabled, play]);
 
   return <SfxContext.Provider value={{ enabled, toggle, play }}>{children}</SfxContext.Provider>;
 };
@@ -122,6 +247,9 @@ const WORDS = [
   "TA-DA!",
   "EOF!",
   "SHAZAM!",
+  "MERGE!",
+  "LGTM!",
+  "O(1)!",
 ];
 const WORD_COLORS = ["var(--yellow)", "var(--pink)", "var(--cyan)", "var(--green)", "#ffffff"];
 

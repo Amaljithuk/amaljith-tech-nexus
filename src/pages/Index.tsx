@@ -18,6 +18,7 @@ import {
   Starburst,
   Tape,
 } from "@/components/comic/ComicKit";
+import { useSfx } from "@/components/comic/Effects";
 import {
   marqueeSkills,
   powerStats,
@@ -62,10 +63,11 @@ const barColors = ["var(--red)", "var(--blue)", "var(--purple)", "var(--green)",
 const Index = () => {
   const [comicMode, setComicMode] = useState(false);
   const featured = projects.slice(0, 3);
+  const { play } = useSfx();
 
   return (
     <div className="overflow-hidden">
-      {/* ============================== HERO ============================== */}
+      {/* ============================== OPENING PANEL ============================== */}
       <section className="relative">
         <div
           className="pointer-events-none absolute -right-28 -top-32 h-80 w-80 rounded-full halftone-strong opacity-50 spin-slow"
@@ -93,7 +95,7 @@ const Index = () => {
 
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <span className="display -rotate-1 border-[3px] border-comic-ink bg-comic-ink px-3 pb-1 pt-0.5 text-lg tracking-[0.14em] text-comic-yellow shadow-comic-sm">
-                The full-stack crusader
+                The full-stack workhorse
               </span>
               <span className="display rotate-1 border-[3px] border-comic-ink bg-comic-cream px-3 pb-1 pt-0.5 text-lg tracking-[0.1em]">
                 AI agent wrangler
@@ -167,7 +169,7 @@ const Index = () => {
                 </Starburst>
               </div>
               <figcaption className="mt-2 px-1 pb-1 font-display text-[19px] leading-[1.1] tracking-wide">
-                Our hero, smiling because the build passed on the first try. It did not, but let him have
+                Panel 1: smiling because the build passed on the first try. It did not, but let him have
                 this.
               </figcaption>
             </figure>
@@ -175,9 +177,13 @@ const Index = () => {
             <div className="mt-6 flex justify-center">
               <button
                 type="button"
-                onClick={() => setComicMode((v) => !v)}
+                onClick={() => {
+                  setComicMode((v) => !v);
+                  play("boing");
+                }}
                 className="btn-comic btn-sm btn-paper"
                 aria-pressed={comicMode}
+                data-sfx-quiet
               >
                 <Sparkles size={14} /> {comicMode ? "Show the real me" : "Comic-ify me"}
               </button>
@@ -368,7 +374,7 @@ const Index = () => {
                 <span className="sticker sticker-red">To be continued…</span>
                 <h2 className="display mt-4 text-4xl leading-[0.9] sm:text-5xl">
                   Got a role, a project,
-                  <br /> or a heroic bug?
+                  <br /> or a spectacular bug?
                 </h2>
                 <p className="mt-4 max-w-xl text-lg font-bold text-comic-ink/80">
                   I build things, break things on purpose, and document the damage. Let's put that on
