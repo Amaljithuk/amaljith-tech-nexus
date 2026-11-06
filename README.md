@@ -1,73 +1,59 @@
-# Welcome to your Lovable project
+# Amaljith U K — The Portfolio Issue #01
 
-## Project info
+A comic-book portfolio. Newsprint paper, ink outlines, halftone dots, speech bubbles,
+sound-effect words and slightly too many exclamation marks. Built with React + Vite +
+Tailwind, and drawn to match the résumé.
 
-**URL**: https://lovable.dev/projects/c9b93b83-6a2a-4e70-8ece-c6cb536b25c1
+## What's inside
 
-## How can I edit this code?
+| Route | Chapter | What it is |
+| --- | --- | --- |
+| `/` | Cover | Hero panel, stat stickers, skill power-bars, this month's issues |
+| `/about` | 01 · Origin | Comic strip, education, the three internships, gadget belt, side quests |
+| `/projects` | 02 · Issues | Four project "issues" with a category filter |
+| `/achievements` | 03 · Trophy room | UGC NET, ModelQuest, certificates, sports panel |
+| `/contact` | 04 · Signal | Mailto-powered form, direct lines, FAQ |
+| `*` | — | 404: "This page walked into the multiverse" |
 
-There are several ways of editing your application.
+## Editing the content
 
-**Use Lovable**
+**All copy lives in one file:** [`src/data/resume.ts`](src/data/resume.ts).
+Profile, summary, experience, education, skills, projects, achievements, leadership,
+languages — change it there and every page updates. The jokes are in that file too.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c9b93b83-6a2a-4e70-8ece-c6cb536b25c1) and start prompting.
+Images: `public/lovable-uploads/profile.png` (photo) and
+`public/lovable-uploads/portrait-halftone.png` (the "comic-ify me" version, generated from
+the photo).
 
-Changes made via Lovable will be committed automatically to this repo.
+## Playful bits (on purpose)
 
-**Use your preferred IDE**
+- Sound-effect words pop wherever you click; a **SFX** toggle in the navbar adds tiny
+  8-bit blips (WebAudio, no audio files, off by default).
+- Comic panels reveal with a springy page-turn as you scroll (disabled automatically for
+  `prefers-reduced-motion`).
+- Two infinite ticker strips, a reading-progress rail, sticker navigation, halftone
+  backdrops and a barcode on the back cover.
+- "Comic-ify me" flips the portrait to its halftone print version.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Run it
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm install
+npm run dev      # http://localhost:8080
+npm run build    # production build in dist/
+npm run preview
 ```
 
-**Edit a file directly in GitHub**
+## Stack
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Vite 5 · React 18 · TypeScript
+- Tailwind CSS 3 (custom comic design tokens in `src/index.css`)
+- React Router 6
+- Hand-rolled design system in `src/components/comic/` (`ComicKit`, `Effects`)
+- Fonts: Bangers + Comic Neue + Special Elite (Google Fonts), with system comic fallbacks
 
-**Use GitHub Codespaces**
+## Contact
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/c9b93b83-6a2a-4e70-8ece-c6cb536b25c1) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Email: jith94245@gmail.com
+- LinkedIn: [linkedin.com/in/amaljithuk2003](https://linkedin.com/in/amaljithuk2003)
+- GitHub: [github.com/Amaljithuk](https://github.com/Amaljithuk)
